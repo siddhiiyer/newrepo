@@ -1,0 +1,1988 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sustainly - Dashboard</title>
+    <script>
+        (function() {
+            const theme = localStorage.getItem('sustainly-theme') || 'light';
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
+
+        :root {
+            --bg-color: #F8F9F5;
+            --text-color: #1A1D19;
+            --primary-green: #37533D;
+            --accent-green: #A8C69F;
+            --light-green: #E4EFDE;
+            --lighter-green: #F0F4ED;
+            --glass-bg: rgba(255, 255, 255, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.4);
+            --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.03);
+            --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.08);
+            --transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #080A08;
+            --text-color: #F8F9F5;
+            --text-secondary: rgba(248, 249, 245, 0.7);
+            --text-muted: rgba(248, 249, 245, 0.5);
+            --primary-green: #6EE7B7;
+            --accent-green: #34D399;
+            --light-green: #111827;
+            --lighter-green: #0F172A;
+            --glass-bg: rgba(17, 24, 39, 0.7);
+            --glass-border: rgba(110, 231, 183, 0.1);
+            --shadow-sm: 0 4px 20px rgba(0, 0, 0, 0.4);
+            --shadow-md: 0 12px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        [data-theme="dark"] .glass-card:hover,
+        [data-theme="dark"] .report-card:hover,
+        [data-theme="dark"] .impact-card:hover,
+        [data-theme="dark"] .category-item:hover {
+            background: rgba(110, 231, 183, 0.08) !important;
+            border-color: var(--primary-green);
+        }
+
+        [data-theme="dark"] .sidebar-title,
+        [data-theme="dark"] .card-title,
+        [data-theme="dark"] .report-title,
+        [data-theme="dark"] .cat-name,
+        [data-theme="dark"] .timeline-title {
+            color: var(--text-color) !important;
+        }
+
+        [data-theme="dark"] .stat-label,
+        [data-theme="dark"] .cat-val,
+        [data-theme="dark"] .report-unit,
+        [data-theme="dark"] .see-all,
+        [data-theme="dark"] .timeline-desc {
+            color: var(--text-secondary) !important;
+        }
+
+        [data-theme="dark"] .cat-icon,
+        [data-theme="dark"] .cat-arrow {
+            background-color: rgba(255, 255, 255, 0.05);
+            color: var(--primary-green);
+        }
+
+        [data-theme="dark"] .sidebar {
+            background: rgba(8, 10, 8, 0.8);
+            border-right-color: rgba(110, 231, 183, 0.05);
+        }
+
+        [data-theme="dark"] .nav-item:not(.active) {
+            color: #A8C69F;
+        }
+
+        [data-theme="dark"] .nav-item:hover:not(.active) {
+            background-color: rgba(110, 231, 183, 0.1);
+            color: var(--primary-green);
+        }
+
+        [data-theme="dark"] .user-profile {
+            background: rgba(255, 255, 255, 0.03);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        [data-theme="dark"] .user-name {
+            color: white;
+        }
+
+        [data-theme="dark"] .card-title {
+            color: white;
+        }
+
+        [data-theme="dark"] .donut-hole {
+            background-color: #121813;
+        }
+
+        [data-theme="dark"] .stat-label {
+            color: rgba(110, 231, 183, 0.7);
+        }
+
+        [data-theme="dark"] .legend-item {
+            color: rgba(110, 231, 183, 0.8);
+        }
+
+        [data-theme="dark"] .progress-container {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        [data-theme="dark"] .btn-primary {
+            background: var(--primary-green);
+            color: #080A08;
+            box-shadow: 0 8px 25px rgba(110, 231, 183, 0.2);
+        }
+
+        [data-theme="dark"] .btn-primary:hover {
+            box-shadow: 0 12px 30px rgba(110, 231, 183, 0.4);
+            filter: brightness(1.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(168, 198, 159, 0.1) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(55, 83, 61, 0.03) 0px, transparent 50%);
+            color: var(--text-color);
+            display: flex;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Layout Grid */
+        .dashboard-layout {
+            display: grid;
+            grid-template-columns: 260px 1fr 360px;
+            width: 100%;
+            max-width: 1600px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        /* Left Sidebar - Glassmorphism */
+        .sidebar {
+            padding: 2.5rem 1.75rem;
+            display: flex;
+            flex-direction: column;
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            border-right: 1px solid var(--glass-border);
+            height: 100vh;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .logo {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--primary-green);
+            margin-bottom: 3.5rem;
+            margin-left: 0.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        .nav-items {
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+            flex-grow: 1;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            padding: 0.9rem 1.25rem;
+            border-radius: 16px;
+            text-decoration: none;
+            color: #555E52;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: var(--transition);
+        }
+
+        .nav-item.active {
+            background-color: var(--primary-green);
+            color: white;
+            box-shadow: 0 8px 20px rgba(55, 83, 61, 0.2);
+        }
+
+        .nav-item:hover:not(.active) {
+            background-color: rgba(55, 83, 61, 0.05);
+            color: var(--primary-green);
+            transform: translateX(5px);
+        }
+
+        .nav-icon {
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1.25rem;
+            background: rgba(255, 255, 255, 0.4);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            margin-top: auto;
+            transition: var(--transition);
+        }
+
+        .user-profile:hover {
+            background: rgba(255, 255, 255, 0.6);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 14px;
+            background-color: var(--primary-green);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(55, 83, 61, 0.2);
+        }
+
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .user-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .user-name {
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: var(--text-color);
+        }
+
+        .user-role {
+            font-size: 0.7rem;
+            color: #667064;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 3rem 4rem;
+            background: linear-gradient(to right, rgba(255,255,255,0.2), transparent);
+        }
+
+        /* Budget Card - Modern Mesh Gradient */
+        .budget-card {
+            background: linear-gradient(135deg, var(--primary-green) 0%, #527A5A 100%);
+            color: white;
+            border-radius: 32px;
+            padding: 3rem;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 3rem;
+            box-shadow: 0 20px 50px rgba(55, 83, 61, 0.15);
+            transition: var(--transition);
+        }
+
+        .budget-card:hover {
+            transform: translateY(-5px) scale(1.01);
+            box-shadow: 0 30px 60px rgba(55, 83, 61, 0.2);
+        }
+
+        .budget-bg-decor {
+            position: absolute;
+            right: -5%;
+            top: -10%;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(5px);
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 700;
+            border-radius: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .budget-title {
+            font-size: 2.2rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.03em;
+        }
+
+        .budget-subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 2.5rem;
+            font-weight: 400;
+        }
+
+        .budget-stats {
+            display: flex;
+            gap: 4rem;
+            align-items: flex-end;
+        }
+
+        .stat-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            opacity: 0.7;
+            font-weight: 500;
+        }
+
+        .stat-value {
+            font-size: 3rem;
+            font-weight: 800;
+            line-height: 1;
+            letter-spacing: -0.02em;
+        }
+
+        .stat-unit {
+            font-size: 1rem;
+            opacity: 0.7;
+            margin-left: 0.25rem;
+        }
+
+        .progress-bar {
+            height: 10px;
+            background-color: rgba(255, 255, 255, 0.7);
+            border-radius: 10px;
+            margin-bottom: 0.75rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            background-color: #5c7056;
+            border-radius: 10px;
+            width: 25%;
+            /* 100 - 75 remaining */
+        }
+
+        .budget-stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 600;
+            margin-top: 0.5rem;
+        }
+
+        /* Metrics Row */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .report-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            border-radius: 28px;
+            padding: 2rem;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+            position: relative;
+            transition: var(--transition);
+        }
+
+        .report-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-md);
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        .report-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .report-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-color);
+            letter-spacing: -0.01em;
+        }
+
+        .report-badge {
+            font-size: 0.65rem;
+            font-weight: 800;
+            padding: 0.3rem 0.6rem;
+            border-radius: 50px;
+            text-transform: uppercase;
+        }
+
+        .badge-within {
+            background-color: #E1EED3;
+            color: #3B5742;
+        }
+
+        .badge-approaching {
+            background-color: #FFF3E0;
+            color: #E65100;
+        }
+
+        .badge-exceeded {
+            background-color: #FFEBEE;
+            color: #C62828;
+        }
+
+        .report-data {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+
+        .report-val {
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: var(--primary-green);
+        }
+
+        .report-unit {
+            font-size: 0.75rem;
+            color: #aaa;
+            font-weight: 600;
+        }
+
+        .report-budget {
+            font-size: 0.75rem;
+            color: var(--text-muted, #666);
+            font-weight: 500;
+        }
+
+        .report-forecast-modern {
+            font-size: 0.8rem;
+            font-weight: 600;
+            padding: 1.25rem;
+            background: rgba(55, 83, 61, 0.04);
+            border-radius: 20px;
+            margin-top: auto;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            border: 1px solid rgba(55, 83, 61, 0.05);
+        }
+
+        .weekly-report-enhanced {
+            padding-bottom: 0;
+            overflow: hidden;
+        }
+
+        .report-main-content {
+            padding: 0.5rem 0;
+        }
+
+        .report-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #7A8978;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--primary-green);
+        }
+
+        .stat-value small {
+            font-size: 0.8rem;
+            color: #aaa;
+            font-weight: 600;
+        }
+
+        .projection-section {
+            background-color: var(--lighter-green);
+            padding: 1.25rem;
+            border-radius: 1.25rem;
+            margin-top: 1rem;
+        }
+
+        .projection-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .projection-header span:first-child {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--primary-green);
+        }
+
+        .projection-val {
+            font-size: 0.9rem;
+            font-weight: 800;
+            color: var(--primary-green);
+        }
+
+        .progress-bar-container {
+            width: 100%;
+        }
+
+        .forecast-safe { color: #3B5742; }
+        .forecast-warning { color: #E65100; }
+        .forecast-danger { color: #C62828; }
+
+        .forecast-trend {
+            width: 14px;
+            height: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Impact Area - Glassmorphism */
+        .impact-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            border-radius: 28px;
+            padding: 2.5rem;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: var(--transition);
+        }
+
+        .impact-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.8);
+            box-shadow: var(--shadow-md);
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            align-self: flex-start;
+            margin-bottom: 2rem;
+        }
+
+        .donut-chart {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: conic-gradient(var(--primary-green) 0% 45%, var(--accent-green) 45% 75%, var(--light-green) 75% 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            margin-bottom: 2.5rem;
+            box-shadow: 0 10px 30px rgba(55, 83, 61, 0.1);
+        }
+
+        .donut-hole {
+            width: 155px;
+            height: 155px;
+            background-color: white;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .donut-val {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--text-color);
+            line-height: 1.1;
+        }
+
+        .donut-label {
+            font-size: 0.65rem;
+            font-weight: 700;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.8rem;
+            color: #555;
+            font-weight: 500;
+        }
+
+        .legend-color {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .c-transport {
+            background-color: #4a6143;
+        }
+
+        .c-electric {
+            background-color: #C3DBAE;
+        }
+
+        .c-food {
+            background-color: #E1EED3;
+        }
+
+        /* Categories Area */
+        .categories-col {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .category-item {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 1.25rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+            text-decoration: none;
+            color: var(--text-color);
+            transition: var(--transition);
+        }
+
+        .category-item:hover {
+            transform: scale(1.03) translateX(5px);
+            background: rgba(255, 255, 255, 0.9);
+            border-color: var(--accent-green);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .cat-icon {
+            width: 40px;
+            height: 40px;
+            background-color: #FFFFFF;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #555;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.02);
+        }
+
+        .cat-info {
+            flex-grow: 1;
+        }
+
+        .cat-name {
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: var(--text-color);
+        }
+
+        .cat-val {
+            font-size: 0.75rem;
+            color: #666;
+            margin-top: 0.1rem;
+        }
+
+        .cat-arrow {
+            color: #999;
+        }
+
+        /* Right Sidebar - Glassmorphism */
+        .right-sidebar {
+            padding: 2.5rem 2rem;
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            border-left: 1px solid var(--glass-border);
+            height: 100vh;
+            position: sticky;
+            top: 0;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            z-index: 50;
+        }
+
+        .sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 2rem;
+        }
+
+        .sidebar-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-color);
+        }
+
+        .see-all {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-secondary, #666);
+            text-decoration: none;
+        }
+
+        .see-all:hover {
+            color: var(--primary-green);
+        }
+
+        /* Timeline Refinement */
+        .timeline {
+            position: relative;
+            padding-left: 1.5rem;
+            margin-bottom: 2rem;
+            flex-grow: 1;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 10px;
+            bottom: 20px;
+            width: 2px;
+            background: linear-gradient(to bottom, var(--primary-green) 0%, transparent 100%);
+            opacity: 0.15;
+            z-index: 1;
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 2.5rem;
+            padding-left: 1.5rem;
+            transition: var(--transition);
+        }
+
+        .timeline-item:hover {
+            transform: translateX(8px);
+        }
+
+        .timeline-dot {
+            position: absolute;
+            left: -1.75rem;
+            top: 0;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: var(--primary-green);
+            box-shadow: 0 0 0 4px rgba(55, 83, 61, 0.1);
+            border: 2px solid var(--bg-color);
+            z-index: 2;
+        }
+
+        .timeline-date {
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: #8C9C84;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.4rem;
+        }
+
+        .timeline-title {
+            font-size: 1rem;
+            font-weight: 800;
+            color: var(--text-color);
+            margin-bottom: 0.4rem;
+            letter-spacing: -0.01em;
+        }
+
+        .timeline-desc {
+            font-size: 0.85rem;
+            color: var(--text-secondary, #667064);
+            line-height: 1.5;
+            padding-right: 1.5rem;
+        }
+
+        .delete-activity {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: none;
+            border: none;
+            color: #ccc;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            transition: all 0.2s;
+            opacity: 0;
+        }
+
+        .timeline-item:hover .delete-activity {
+            opacity: 1;
+        }
+
+        .delete-activity:hover {
+            color: #ff4d4d;
+            background-color: rgba(255, 77, 77, 0.05);
+        }
+
+        /* Tip Card */
+        .tip-card {
+            background-color: var(--lighter-green);
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .tip-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--text-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .tip-desc {
+            font-size: 0.8rem;
+            color: var(--text-secondary, #555);
+            line-height: 1.5;
+        }
+
+        /* FAB */
+        .fab {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: #4a6143;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: 300;
+            box-shadow: 0 10px 25px rgba(74, 97, 67, 0.4);
+            cursor: pointer;
+            transition: transform 0.2s, background-color 0.2s;
+            z-index: 100;
+            border: none;
+        }
+
+        .fab:hover {
+            transform: scale(1.05);
+            background-color: #3B5742;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background-color: rgba(30, 33, 29, 0.4);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            opacity: 1;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .modal-card {
+            background-color: #FFFFFF;
+            width: 100%;
+            max-width: 450px;
+            border-radius: 2rem;
+            padding: 2.5rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            transform: scale(1);
+            transition: transform 0.3s ease;
+        }
+
+        .modal-overlay.hidden .modal-card {
+            transform: scale(0.95);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary-green);
+            letter-spacing: -0.02em;
+        }
+
+        .btn-close {
+            background: none;
+            border: none;
+            cursor: pointer;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #888;
+            transition: background-color 0.2s;
+        }
+
+        .btn-close:hover {
+            background-color: #f0f0f0;
+            color: #333;
+        }
+
+        .form-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #888;
+            margin-bottom: 0.75rem;
+        }
+
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.75rem;
+        }
+
+        .cat-radio {
+            display: none;
+        }
+
+        .cat-card {
+            border: 2px solid #E8F3DF;
+            border-radius: 1rem;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #555;
+        }
+
+        .cat-radio:checked+.cat-card {
+            background-color: var(--lighter-green);
+            border-color: var(--primary-green);
+            color: var(--primary-green);
+        }
+
+        .cat-card:hover {
+            background-color: #f9fbf7;
+        }
+
+        .cat-card svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .cat-card span {
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-lg {
+            width: 100%;
+            background-color: var(--bg-color);
+            border: none;
+            border-radius: 50px;
+            padding: 1rem 1.5rem;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #999;
+            outline: none;
+        }
+
+        .input-unit {
+            position: absolute;
+            right: 1.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #999;
+            text-transform: uppercase;
+        }
+
+        .textarea-styled {
+            width: 100%;
+            background-color: var(--bg-color);
+            border: none;
+            border-radius: 1.5rem;
+            padding: 1rem 1.5rem;
+            font-size: 0.9rem;
+            color: #333;
+            resize: none;
+            outline: none;
+            transition: box-shadow 0.2s;
+        }
+
+        .textarea-styled:focus {
+            box-shadow: 0 0 0 2px var(--primary-green);
+        }
+
+        .btn-modal-submit {
+            width: 100%;
+            background-color: var(--primary-green);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 1.25rem;
+            font-size: 1rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: transform 0.2s, background-color 0.2s, box-shadow 0.2s;
+            box-shadow: 0 10px 20px rgba(59, 87, 66, 0.2);
+            margin-top: 1rem;
+        }
+
+        .btn-modal-submit:hover {
+            transform: scale(1.02);
+            box-shadow: 0 15px 25px rgba(59, 87, 66, 0.3);
+            background-color: #2c4232;
+        }
+
+        .btn-modal-submit:active {
+            transform: scale(0.98);
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .dashboard-layout {
+                grid-template-columns: 200px 1fr 300px;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .dashboard-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                display: none;
+                /* Hide for simplicity, would need a hamburger menu */
+            }
+
+            .right-sidebar {
+                border-left: none;
+                border-top: 1px solid rgba(0, 0, 0, 0.04);
+                height: auto;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .budget-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .budget-percent {
+                text-align: left;
+            }
+
+            .budget-desc {
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard-layout">
+        <!-- Left Sidebar -->
+        <aside class="sidebar">
+            <div class="logo"><img src="logo.jpg" alt="Sustainly Logo" style="height: 36px; border-radius: 50%;"> Sustainly</div>
+            <nav class="nav-items">
+                <a href="dashboard.html" class="nav-item active">
+                    <div class="nav-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M3 3h8v8H3V3zm0 10h8v8H3v-8zm10-10h8v8h-8V3zm0 10h8v8h-8v-8z" />
+                        </svg>
+                    </div>
+                    Dashboard
+                </a>
+                <a href="reports.html" class="nav-item">
+                    <div class="nav-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 20v-6M6 20V10M18 20V4" />
+                        </svg>
+                    </div>
+                    Reports
+                </a>
+                <a href="#" class="nav-item" id="theme-toggle" onclick="toggleTheme()">
+                    <div class="nav-icon theme-icon-container">
+                        <svg class="sun-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="5"></circle>
+                            <line x1="12" y1="1" x2="12" y2="3"></line>
+                            <line x1="12" y1="21" x2="12" y2="23"></line>
+                            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                            <line x1="1" y1="12" x2="3" y2="12"></line>
+                            <line x1="21" y1="12" x2="23" y2="12"></line>
+                            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                        </svg>
+                        <svg class="moon-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none;">
+                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                        </svg>
+                    </div>
+                    <span>Dark Mode</span>
+                </a>
+                <a href="#" class="nav-item" onclick="logout()">
+                    <div class="nav-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                            <polyline points="16 17 21 12 16 7"></polyline>
+                            <line x1="21" y1="12" x2="9" y2="12"></line>
+                        </svg>
+                    </div>
+                    Logout
+                </a>
+            </nav>
+            <div class="user-profile">
+                <div class="avatar">
+                    <img id="user-photo" src="https://i.pinimg.com/1200x/ef/a2/41/efa2417ae55533d7da6da8d1c022b25d.jpg" alt="profile">
+                </div>
+                <div class="user-info">
+                    <span id="user-name" class="user-name">Siddhi Iyer</span>
+                    <span class="user-role">Planet Protector</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Budget Card -->
+            <div class="budget-card">
+                <div class="budget-bg-decor"></div>
+                <span class="badge" id="ui-yearly-badge">Within Year Limit</span>
+                <div class="budget-header">
+                    <h1 class="budget-title">Yearly Carbon Budget</h1>
+                    <div class="budget-percent">
+                        <div class="percent-val" id="ui-budget-percent">100%</div>
+                        <div class="percent-label">Remaining</div>
+                    </div>
+                </div>
+                <p class="budget-desc">Your annual footprint target is 3.0 tons. Stay consistent to protect the planet.</p>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="ui-progress-fill" style="width: 0%"></div>
+                </div>
+                <div class="budget-stats">
+                    <span id="ui-current-usage">Current usage: 0.00 tons CO2e</span>
+                    <span>Budget limit: 3.0 tons CO2e</span>
+                </div>
+            </div>
+
+            <!-- Reports Grid -->
+            <div class="metrics-grid" style="grid-template-columns: 1fr;">
+                <!-- Weekly Report -->
+                <div class="report-card weekly-report-enhanced">
+                    <div class="report-header">
+                        <span class="report-title">Weekly Tracker</span>
+                        <span class="report-badge badge-within" id="ui-weekly-badge">On Track</span>
+                    </div>
+                    
+                    <div class="report-main-content">
+                        <div class="report-stats">
+                            <div class="stat-group">
+                                <div class="stat-label">Total Consumed</div>
+                                <div class="stat-value"><span id="ui-weekly-usage">0</span> <small>kg CO2e</small></div>
+                            </div>
+                            <div class="stat-group">
+                                <div class="stat-label">Weekly Budget</div>
+                                <div class="stat-value" style="color: #666;"><span id="ui-weekly-budget-val">58</span> <small>kg</small></div>
+                            </div>
+                        </div>
+                        
+                        <div class="projection-section">
+                            <div class="projection-header">
+                                <span>Projection till Sunday</span>
+                                <span id="ui-weekly-projection-val" class="projection-val">--</span>
+                            </div>
+                            <div class="progress-bar-container">
+                                <div class="progress-bar" style="height: 12px; border-radius: 6px; margin-bottom: 0;">
+                                    <div class="progress-fill" id="ui-weekly-fill" style="width: 0%; background: linear-gradient(90deg, #8C9C84, #4a6143);"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="report-forecast-modern" id="ui-weekly-forecast">
+                        <!-- Weekly Forecast text -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Metrics Grid -->
+            <div class="metrics-grid">
+                <!-- Impact Distribution -->
+                <div class="impact-card">
+                    <h2 class="card-title">Impact Distribution</h2>
+                    <div class="donut-chart" id="ui-donut-chart">
+                        <div class="donut-hole">
+                            <div class="donut-val" id="ui-donut-total">1.2t</div>
+                            <div class="donut-label">Total</div>
+                        </div>
+                    </div>
+                    <div class="legend">
+                        <div class="legend-item">
+                            <div class="legend-color c-transport"></div>
+                            Transport
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color c-electric"></div>
+                            Electricity
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color c-food"></div>
+                            Food
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Categories -->
+                <div class="categories-col">
+                    <a href="#" class="category-item">
+                        <div class="cat-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="11" width="18" height="10" rx="2"></rect>
+                                <circle cx="7" cy="21" r="2"></circle>
+                                <circle cx="17" cy="21" r="2"></circle>
+                                <path d="M14 11V7a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v4"></path>
+                            </svg>
+                        </div>
+                        <div class="cat-info">
+                            <div class="cat-name">Transport</div>
+                            <div class="cat-val" id="ui-cat-transport">0.54 tons CO2e</div>
+                        </div>
+                        <div class="cat-arrow">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="9 18 15 12 9 6"></polyline>
+                            </svg>
+                        </div>
+                    </a>
+
+                    <a href="#" class="category-item">
+                        <div class="cat-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                            </svg>
+                        </div>
+                        <div class="cat-info">
+                            <div class="cat-name">Electricity</div>
+                            <div class="cat-val" id="ui-cat-electricity">0.30 tons CO2e</div>
+                        </div>
+                        <div class="cat-arrow">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="9 18 15 12 9 6"></polyline>
+                            </svg>
+                        </div>
+                    </a>
+
+                    <a href="#" class="category-item">
+                        <div class="cat-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
+                                <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
+                                <line x1="6" y1="1" x2="6" y2="4"></line>
+                                <line x1="10" y1="1" x2="10" y2="4"></line>
+                                <line x1="14" y1="1" x2="14" y2="4"></line>
+                            </svg>
+                        </div>
+                        <div class="cat-info">
+                            <div class="cat-name">Food</div>
+                            <div class="cat-val" id="ui-cat-food">0.36 tons CO2e</div>
+                        </div>
+                        <div class="cat-arrow">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="9 18 15 12 9 6"></polyline>
+                            </svg>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </main>
+
+        <!-- Right Sidebar -->
+        <aside class="right-sidebar">
+            <div class="sidebar-header">
+                <h2 class="sidebar-title">Recent Activity</h2>
+                <a href="#" class="see-all">See all</a>
+            </div>
+
+            <div class="timeline" id="ui-timeline">
+                <!-- Activities will be added dynamically -->
+            </div>
+
+            <div class="tip-card" id="ui-tip-card">
+                <span class="badge" style="background-color: var(--primary-green); color: white; margin-bottom: 0.75rem;">Personalized Tip</span>
+                <h3 class="tip-title" id="ui-tip-title">The Archivist's Tip</h3>
+                <p class="tip-desc" id="ui-tip-desc">Reducing red meat consumption once a week could lower your food footprint by nearly 15% this month.</p>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Floating Action Button -->
+    <button class="fab" onclick="toggleModal()">+</button>
+
+    <!-- Modal: Add Activity -->
+    <div class="modal-overlay hidden" id="add-activity-modal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h2 class="modal-title">Add Activity</h2>
+                <button class="btn-close" onclick="toggleModal()" aria-label="Close">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+
+            <form onsubmit="handleAddActivity(event);">
+                <!-- Category Selector -->
+                <div class="form-section">
+                    <label class="form-label">Category</label>
+                    <div class="category-grid">
+                        <label>
+                            <input class="cat-radio" name="category" onchange="updateDynamicFields(this.value)"
+                                type="radio" value="transport" />
+                            <div class="cat-card">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="3" y="11" width="18" height="10" rx="2"></rect>
+                                    <circle cx="7" cy="21" r="2"></circle>
+                                    <circle cx="17" cy="21" r="2"></circle>
+                                    <path d="M14 11V7a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v4"></path>
+                                </svg>
+                                <span>Transport</span>
+                            </div>
+                        </label>
+                        <label>
+                            <input class="cat-radio" name="category" onchange="updateDynamicFields(this.value)"
+                                type="radio" value="food" />
+                            <div class="cat-card">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
+                                    <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
+                                    <line x1="6" y1="1" x2="6" y2="4"></line>
+                                    <line x1="10" y1="1" x2="10" y2="4"></line>
+                                    <line x1="14" y1="1" x2="14" y2="4"></line>
+                                </svg>
+                                <span>Food</span>
+                            </div>
+                        </label>
+                        <label>
+                            <input class="cat-radio" name="category" onchange="updateDynamicFields(this.value)"
+                                type="radio" value="electricity" />
+                            <div class="cat-card">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                                </svg>
+                                <span>Energy</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <div id="dynamic-fields-container" style="display: none; margin-bottom: 1.5rem;">
+                </div>
+
+                <!-- Value Input -->
+                <div class="form-section">
+                    <label class="form-label" for="estimated-impact">Estimated Carbon Impact</label>
+                    <div class="input-wrapper">
+                        <input class="input-lg" id="estimated-impact" placeholder="0.00" readonly type="text"
+                            value="0.00" />
+                        <span class="input-unit">kg CO2e</span>
+                    </div>
+                </div>
+
+                <!-- Note TextArea -->
+                <div class="form-section">
+                    <label class="form-label" for="activity-note">Notes (Optional)</label>
+                    <textarea class="textarea-styled" id="activity-note"
+                        placeholder="Add any details about this activity..." rows="3"></textarea>
+                </div>
+
+                <!-- Submit Button -->
+                <button class="btn-modal-submit" type="submit">Add Activity</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Theme Management
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('sustainly-theme', newTheme);
+            updateThemeUI(newTheme);
+        }
+
+        function updateThemeUI(theme) {
+            const sunIcon = document.querySelector('.sun-icon');
+            const moonIcon = document.querySelector('.moon-icon');
+            const themeToggle = document.getElementById('theme-toggle');
+            if (!themeToggle) return;
+            const themeText = themeToggle.querySelector('span');
+            
+            if (!sunIcon || !moonIcon) return;
+
+            if (theme === 'dark') {
+                sunIcon.style.display = 'none';
+                moonIcon.style.display = 'block';
+                themeText.innerText = 'Light Mode';
+            } else {
+                sunIcon.style.display = 'block';
+                moonIcon.style.display = 'none';
+                themeText.innerText = 'Dark Mode';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('sustainly-theme') || 'light';
+            updateThemeUI(savedTheme);
+        });
+
+        const impactFactors = {
+            transport: {
+                private: 0.2,
+                scooter: 0.1,
+                bus: 0.05,
+                flight_short: 0.15,
+                flight_long: 0.12
+            },
+            food: {
+                meat: 3,
+                veg: 1,
+                vegan: 0.5
+            },
+            electricity: 0.82
+        };
+
+        // App State (will be loaded per user)
+        const defaultState = {
+            budgetLimit: 3.0, // Yearly budget in tons
+            usage: {
+                transport: 0,
+                food: 0,
+                electricity: 0
+            },
+            timeline: []
+        };
+        
+        let appState = null;
+        let currentUid = null;
+
+        function saveState() {
+            if (currentUid && appState) {
+                localStorage.setItem(`sustainlyState_${currentUid}`, JSON.stringify(appState));
+            }
+        }
+
+        function toggleModal() {
+            const modal = document.getElementById('add-activity-modal');
+            modal.classList.toggle('hidden');
+        }
+
+        function updateDynamicFields(category) {
+            const container = document.getElementById('dynamic-fields-container');
+            const impactInput = document.getElementById('estimated-impact');
+            impactInput.value = '0.00';
+
+            container.style.display = 'block';
+            let html = '';
+
+            if (category === 'transport') {
+                html = `
+                    <div class="form-section">
+                        <label class="form-label">Transport Type</label>
+                        <select id="transport-type" class="textarea-styled" onchange="calculateImpact('transport')">
+                            <option value="private">Private car (0.2 kg/km)</option>
+                            <option value="scooter">Motorbike/scooter (0.1 kg/km)</option>
+                            <option value="bus">Bus/public transport (0.05 kg/km)</option>
+                            <option value="flight_short">Flights (short haul <1000 km) (0.15 kg/km)</option>
+                            <option value="flight_long">Flights (long haul >1000 km) (0.12 kg/km)</option>
+                        </select>
+                    </div>
+                    <div class="form-section" style="margin-top: 1rem;">
+                        <label class="form-label">Distance (km)</label>
+                        <input type="number" id="transport-distance" class="textarea-styled" placeholder="Enter distance in km" min="0" oninput="calculateImpact('transport')">
+                    </div>
+                `;
+            } else if (category === 'food') {
+                html = `
+                    <div class="form-section">
+                        <label class="form-label">Meal Type</label>
+                        <select id="food-type" class="textarea-styled" onchange="calculateImpact('food')">
+                            <option value="meat">Meat-heavy meal (3 kg/meal)</option>
+                            <option value="veg">Vegetarian meal (1 kg/meal)</option>
+                            <option value="vegan">Vegan meal (0.5 kg/meal)</option>
+                        </select>
+                    </div>
+                    <div class="form-section" style="margin-top: 1rem;">
+                        <label class="form-label">Number of meals</label>
+                        <input type="number" id="food-count" class="textarea-styled" placeholder="Enter number of meals" min="0" oninput="calculateImpact('food')">
+                    </div>
+                `;
+            } else if (category === 'electricity') {
+                html = `
+                    <div class="form-section">
+                        <label class="form-label">Units Consumed (kWh)</label>
+                        <input type="number" id="electricity-units" class="textarea-styled" placeholder="Enter electricity used in kWh" min="0" oninput="calculateImpact('electricity')">
+                    </div>
+                `;
+            }
+
+            container.innerHTML = html;
+        }
+
+        function calculateImpact(category) {
+            let impact = 0;
+            const impactInput = document.getElementById('estimated-impact');
+
+            if (category === 'transport') {
+                const type = document.getElementById('transport-type').value;
+                const distance = parseFloat(document.getElementById('transport-distance').value) || 0;
+                impact = distance * impactFactors.transport[type];
+            } else if (category === 'food') {
+                const type = document.getElementById('food-type').value;
+                const count = parseInt(document.getElementById('food-count').value) || 0;
+                impact = count * impactFactors.food[type];
+            } else if (category === 'electricity') {
+                const units = parseFloat(document.getElementById('electricity-units').value) || 0;
+                impact = units * impactFactors.electricity;
+            }
+
+            impactInput.value = impact.toFixed(2);
+        }
+
+        function getStatusForBudget(usage, budget) {
+            const ratio = usage / budget;
+            if (ratio >= 1) return { text: "Exceeded Budget", class: "badge-exceeded" };
+            if (ratio >= 0.8) return { text: "Approaching Limit", class: "badge-approaching" };
+            return { text: "Within Budget", class: "badge-within" };
+        }
+
+        function getForecast(usage, start, end, budget) {
+            const now = new Date();
+            const totalMs = end.getTime() - start.getTime();
+            const elapsedMs = now.getTime() - start.getTime();
+            
+            // Wait for at least 1 hour of data to avoid wild projections
+            if (elapsedMs < (1 * 60 * 60 * 1000)) return { html: "Gathering trend data...", class: "" };
+
+            const dailyAvg = (usage / (elapsedMs / (1000 * 60 * 60 * 24)));
+            const projected = (usage / elapsedMs) * totalMs;
+            const diff = projected - budget;
+
+            if (projected > budget) {
+                return {
+                    html: `<div class="forecast-trend"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg></div> High risk (exceeding budget)`,
+                    class: "forecast-danger",
+                    projectedValue: projected
+                };
+            } else if (projected > budget * 0.8) {
+                return {
+                    html: `<div class="forecast-trend"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg></div> Warning (near limit)`,
+                    class: "forecast-warning",
+                    projectedValue: projected
+                };
+            } else {
+                return {
+                    html: `<div class="forecast-trend"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"></polyline><polyline points="17 18 23 18 23 12"></polyline></svg></div> Healthy (sustainable pace)`,
+                    class: "forecast-safe",
+                    projectedValue: projected
+                };
+            }
+        }
+
+        function updateDashboardUI() {
+            const now = new Date();
+            const totalUsage = appState.usage.transport + appState.usage.food + appState.usage.electricity;
+            const percentUsed = (totalUsage / appState.budgetLimit) * 100;
+            const percentRemaining = Math.max(0, 100 - percentUsed);
+
+            // Yearly Budget
+            document.getElementById('ui-budget-percent').innerText = `${Math.round(percentRemaining)}%`;
+            document.getElementById('ui-progress-fill').style.width = `${Math.min(100, percentUsed)}%`;
+            document.getElementById('ui-current-usage').innerText = `Current usage: ${totalUsage.toFixed(3)} tons CO2e`;
+            
+            const yearlyStatus = getStatusForBudget(totalUsage, appState.budgetLimit);
+            const yearlyBadge = document.getElementById('ui-yearly-badge');
+            yearlyBadge.innerText = yearlyStatus.text;
+            yearlyBadge.className = `badge ${yearlyStatus.class}`;
+
+            // Weekly Stats
+            const startOfWeek = new Date(now);
+            const dayOfWeek = startOfWeek.getDay() || 7; // Sunday is 0, make it 7 for Monday-Sunday
+            startOfWeek.setDate(startOfWeek.getDate() - (dayOfWeek - 1));
+            startOfWeek.setHours(0, 0, 0, 0);
+            
+            const endOfWeek = new Date(startOfWeek);
+            endOfWeek.setDate(endOfWeek.getDate() + 7);
+
+            const weeklyUsageKg = appState.timeline
+                .filter(item => new Date(item.timestamp) >= startOfWeek)
+                .reduce((sum, item) => sum + item.impact, 0);
+            
+            const weeklyBudgetKg = (appState.budgetLimit * 1000) / 52;
+            const weeklyStatus = getStatusForBudget(weeklyUsageKg, weeklyBudgetKg);
+            const weeklyForecast = getForecast(weeklyUsageKg, startOfWeek, endOfWeek, weeklyBudgetKg);
+            
+            document.getElementById('ui-weekly-usage').innerText = Math.round(weeklyUsageKg);
+            document.getElementById('ui-weekly-budget-val').innerText = Math.round(weeklyBudgetKg);
+            document.getElementById('ui-weekly-fill').style.width = `${Math.min(100, (weeklyUsageKg / weeklyBudgetKg) * 100)}%`;
+            
+            const weeklyBadge = document.getElementById('ui-weekly-badge');
+            weeklyBadge.innerText = weeklyStatus.text;
+            weeklyBadge.className = `report-badge ${weeklyStatus.class}`;
+            
+            const weeklyForecastEl = document.getElementById('ui-weekly-forecast');
+            weeklyForecastEl.innerHTML = weeklyForecast.html;
+            weeklyForecastEl.className = `report-forecast-modern ${weeklyForecast.class}`;
+
+            // Handle projection text
+            const projectionVal = document.getElementById('ui-weekly-projection-val');
+            if (weeklyForecast.projectedValue) {
+                projectionVal.innerText = `${Math.round(weeklyForecast.projectedValue)} kg CO2e`;
+            } else {
+                projectionVal.innerText = "Gathering data...";
+            }
+
+            // Category Values
+            document.getElementById('ui-cat-transport').innerText = `${appState.usage.transport.toFixed(3)} tons CO2e`;
+            document.getElementById('ui-cat-food').innerText = `${appState.usage.food.toFixed(3)} tons CO2e`;
+            document.getElementById('ui-cat-electricity').innerText = `${appState.usage.electricity.toFixed(3)} tons CO2e`;
+
+            // Donut Chart
+            document.getElementById('ui-donut-total').innerText = `${totalUsage.toFixed(3)}t`;
+
+            const pTransport = (appState.usage.transport / totalUsage) * 100 || 0;
+            const pElectric = (appState.usage.electricity / totalUsage) * 100 || 0;
+
+            const tEnd = pTransport;
+            const eEnd = tEnd + pElectric;
+
+            document.getElementById('ui-donut-chart').style.background = `conic-gradient(
+                #4a6143 0% ${tEnd}%, 
+                #C3DBAE ${tEnd}% ${eEnd}%, 
+                #E1EED3 ${eEnd}% 100%
+            )`;
+
+            // Render Timeline
+            const timeline = document.getElementById('ui-timeline');
+            timeline.innerHTML = appState.timeline.map(item => `
+                <div class="timeline-item">
+                    <div class="timeline-dot" style="${item.color}"></div>
+                    <div class="timeline-date">Logged at ${item.timeStr}</div>
+                    <div class="timeline-title">${item.title}</div>
+                    <div class="timeline-desc">Added ${item.impact.toFixed(2)} kg CO2e. ${item.desc ? 'Note: ' + item.desc : ''}</div>
+                    <button class="delete-activity" onclick="deleteActivity(${item.id})" title="Delete Activity">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function deleteActivity(id) {
+            const index = appState.timeline.findIndex(item => item.id === id);
+            if (index === -1) return;
+
+            if (confirm('Are you sure you want to delete this activity?')) {
+                const item = appState.timeline[index];
+                
+                // Determine category to revert impact
+                let category = item.category;
+                if (!category) {
+                    if (item.color === "background-color:#A8BD4B;") category = 'food';
+                    else if (item.color === "background-color:#74BA81;") category = 'electricity';
+                    else category = 'transport';
+                }
+
+                // Subtract impact from totals (convert kg to tons)
+                const impactTons = item.impact / 1000;
+                if (category && appState.usage[category] !== undefined) {
+                    appState.usage[category] = Math.max(0, appState.usage[category] - impactTons);
+                }
+
+                appState.timeline.splice(index, 1);
+                saveState();
+                updateDashboardUI();
+                updatePersonalizedTip();
+            }
+        }
+
+        function handleAddActivity(event) {
+            event.preventDefault();
+
+            const categoryInput = document.querySelector('input[name="category"]:checked');
+            if (!categoryInput) return;
+
+            const category = categoryInput.value;
+            let impact = parseFloat(document.getElementById('estimated-impact').value) || 0;
+            let title = "New Activity";
+            let desc = "";
+            let color = "";
+
+            if (category === 'transport') {
+                const typeSel = document.getElementById('transport-type');
+                const typeText = typeSel.options[typeSel.selectedIndex].text;
+                const distance = parseFloat(document.getElementById('transport-distance').value) || 0;
+                title = `Traveled ${distance}km via ${typeText.split(' (')[0]}`;
+                desc = document.getElementById('activity-note').value;
+                color = ""; // default color
+            } else if (category === 'food') {
+                const typeSel = document.getElementById('food-type');
+                const typeText = typeSel.options[typeSel.selectedIndex].text;
+                const count = parseInt(document.getElementById('food-count').value) || 0;
+                title = `Logged ${count} ${typeText.split(' (')[0]}`;
+                desc = document.getElementById('activity-note').value;
+                color = "background-color:#A8BD4B;"; // yellowish green
+            } else if (category === 'electricity') {
+                const units = parseFloat(document.getElementById('electricity-units').value) || 0;
+                title = `Consumed ${units} kWh Electricity`;
+                desc = document.getElementById('activity-note').value;
+                color = "background-color:#74BA81;"; // bright green
+            }
+
+            if (impact <= 0) {
+                alert("Please enter a valid value.");
+                return;
+            }
+
+            // impact is in kg, state is in tons
+            const impactTons = impact / 1000;
+            appState.usage[category] += impactTons;
+            
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            
+            appState.timeline.unshift({
+                id: Date.now(),
+                timestamp: Date.now(),
+                category: category,
+                color: color,
+                timeStr: timeStr,
+                title: title,
+                impact: impact,
+                desc: desc
+            });
+            
+            saveState();
+            updateDashboardUI();
+            updatePersonalizedTip();
+
+            toggleModal();
+            event.target.reset();
+            document.getElementById('dynamic-fields-container').style.display = 'none';
+            document.getElementById('estimated-impact').value = '0.00';
+        }
+
+        const tipsDict = {
+            transport: [
+                "Rail over Air: For domestic travel, taking the train instead of flying reduces CO2 emissions by nearly 80% per passenger.",
+                "Short distance travel: For distances under 5km, choosing cycling over driving is the fastest way to decarbonize your commute.",
+                "E-mobility: Switching to an electric vehicle or hybrid can reduce your transport emissions by over 60% compared to a petrol car.",
+                "Eco-Driving: Maintaining moderate speeds and avoiding rapid acceleration can improve your fuel efficiency by up to 25%."
+            ],
+            food: [
+                "Your diet is your biggest impact area. Choosing a plant-based meal tonight could save 2kg of CO2!",
+                "Reduce food waste: Planning your meals and shopping lists can cut your food footprint by 10%.",
+                "Buy local: Seasonal and local produce has a much lower transport-related footprint."
+            ],
+            electricity: [
+                "Energy usage is high! Unplugging idle electronics can save up to 10% on your monthly bill.",
+                "Heating and cooling are big emitters. Adjusting your thermostat by just 1 degree saves significant energy.",
+                "Switch to LEDs: They use 75% less energy and last 25 times longer than incandescent bulbs."
+            ],
+            general: [
+                "Consistency is key! Every small choice you log helps us build a better picture of your progress.",
+                "Did you know? Sharing your sustainability goals with friends makes you 40% more likely to stick to them!"
+            ]
+        };
+
+        function updatePersonalizedTip() {
+            const usage = appState.usage;
+            let topCategory = 'general';
+            let maxVal = 0;
+
+            if (Object.values(usage).some(v => v > 0)) {
+                for (const cat in usage) {
+                    if (usage[cat] > maxVal) {
+                        maxVal = usage[cat];
+                        topCategory = cat;
+                    }
+                }
+            }
+
+            const categoryTips = tipsDict[topCategory];
+            const randomTip = categoryTips[Math.floor(Math.random() * categoryTips.length)];
+
+            const titleMap = {
+                transport: "Transport Focus",
+                food: "Dietary Insights",
+                electricity: "Energy Saving",
+                general: "Sustainability Tip"
+            };
+
+            document.getElementById('ui-tip-title').innerText = titleMap[topCategory];
+            document.getElementById('ui-tip-desc').innerText = randomTip;
+        }
+
+        // Initialize UI
+        updateDashboardUI();
+        updatePersonalizedTip();
+
+    </script>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+
+    <script>
+        const fbConfig = {
+            apiKey: "AIzaSyB4X5aovlc_zctM91qC55ouPOx31VVhMow",
+            authDomain: "sustainly-d5fa6.firebaseapp.com",
+            projectId: "sustainly-d5fa6",
+            storageBucket: "sustainly-d5fa6.firebasestorage.app",
+            messagingSenderId: "455905855613",
+            appId: "1:455905855613:web:d24e30a2c54c0410b98914",
+            measurementId: "G-2WJH60016H"
+        };
+        firebase.initializeApp(fbConfig);
+
+        // Update UI with Auth State
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                currentUid = user.uid;
+                document.getElementById('user-name').innerText = user.displayName || "User";
+                if (user.photoURL) {
+                    document.getElementById('user-photo').src = user.photoURL;
+                }
+
+                // Load state for THIS user
+                const savedData = localStorage.getItem(`sustainlyState_${currentUid}`);
+                appState = savedData ? JSON.parse(savedData) : JSON.parse(JSON.stringify(defaultState));
+
+                // Sanity checks
+                if (!appState.timeline) appState.timeline = [];
+                if (!appState.usage) appState.usage = { transport: 0, food: 0, electricity: 0 };
+                appState.budgetLimit = 3.0;
+
+                // Initial UI Render
+                updateDashboardUI();
+                updatePersonalizedTip();
+            } else {
+                // If not logged in, redirect to login page
+                window.location.href = 'login.html';
+            }
+        });
+
+        function logout() {
+            firebase.auth().signOut().then(() => {
+                localStorage.removeItem('sustainlyUser');
+                currentUid = null;
+                appState = null;
+                window.location.href = 'index.html';
+            });
+        }
+    </script>
+</body>
+
+</html>
